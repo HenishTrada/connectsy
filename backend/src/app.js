@@ -11,7 +11,7 @@ const http=require("http")
 
 app.use(
   cors({
-    origin: "https://connectsy.vercel.app", // your frontend URL
+      origin: "https://connectsy.vercel.app", // your frontend URL
     credentials: true,               // allow cookies
   })
 );

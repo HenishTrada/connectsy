@@ -13,11 +13,14 @@ const initializeSocket = (server) => {
   const io = socket(server, {
     cors: {
       origin: "https://connectsy.vercel.app",
+      credentials: true
     },
   });
 
   // Store online users
   const onlineUsers = {};
+  const drawingRoomData = {}
+
 
   io.on("connection", (socket) => {
     const userId = socket.handshake.query.userId;
@@ -63,6 +66,34 @@ const initializeSocket = (server) => {
         console.log("Send Message Error:", error.message);
       }
     });
+
+    		// ✅ Drawing feature
+		socket.on("joinRoom", ({ roomId, userId }) => {
+			console.log(`User ${userId} joined Drawing Room: ${roomId}`)
+			socket.join(roomId)
+
+			if (!drawingRoomData[roomId]) drawingRoomData[roomId] = []
+
+			// Send existing drawings to new user
+			socket.emit("initialData", drawingRoomData[roomId])
+		})
+
+		socket.on("draw", (data) => {
+			const { roomId } = data
+			if (!drawingRoomData[roomId]) drawingRoomData[roomId] = []
+			drawingRoomData[roomId].push(data)
+
+			socket.to(roomId).emit("draw", data)
+		})
+
+		socket.on("clearCanvas", (roomId) => {
+			drawingRoomData[roomId] = []
+			io.to(roomId).emit("clearCanvas")
+		})
+
+		socket.on("toolChange", ({ roomId, tool, value }) => {
+			socket.to(roomId).emit("toolChange", { tool, value })
+		})
 
     // Handle disconnect
     socket.on("disconnect", () => {

@@ -39,13 +39,14 @@ const Premium = () => {
             alert("Payment successful!! Please refresh the page");
             window.location.reload();
           } catch (error) {
+            console.log(order);
             console.error("Verification failed", error);
             alert("Payment verification failed");
           }
         },
         prefill: {
           name: notes.firstName + " " + notes.lastName,
-          email: "manav@1234gmail.com",
+          email: "tradahenish94gmail.com",
           contact: "9999999999",
         },
         theme: {

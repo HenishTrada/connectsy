@@ -7,13 +7,14 @@ const userAuth = async (req, res,next) => {
     if (!token) {
       return res.status(401).send("No Credentials Found")
     }
-    const decodedMessage = await jwt.verify(token, process.env.JWT_SECRET);
+    const decodedMessage = jwt.verify(token, process.env.JWT_SECRET);
     const { _id } = decodedMessage;
     const user = await User.findById(_id);
     if (!user) {
       throw new Error("User not found");
     }
     req.user=user;
+    console.log("success");
     next();
   } catch (err) {
     res.status(400).send(err.message);

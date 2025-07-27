@@ -28,7 +28,7 @@ const Connections = () => {
 
   useEffect(() => {
     fetchConnections();
-  }, []);
+  });
 
   const filteredConnections = connections.filter((conn) => {
     const fullName = `${conn.firstName} ${conn.lastName}`.toLowerCase();
@@ -192,15 +192,18 @@ const Connections = () => {
                     ))}
                   </div>
                 )}
-                <button
-                  onClick={() => navigate(`/chat/${_id}`)}
-                  className={`sm:absolute sm:right-4 btn sm:top-4 mt-3 sm:mt-0 ${
-                    darkMode ? "btn-primary" : "btn-secondary"
-                  } text-white px-4 py-2 rounded-full transition-transform duration-200 hover:scale-105`}
-                >
-                  💬 Chat
-                </button>
+                
+                
               </div>
+              <div className="gap-3 flex relative">
+
+                <Link to={"/chat/" + _id}>
+                          <button className="btn btn-primary">Chat</button>
+                        </Link>
+                        <Link to={"/draw"}>
+                          <button className="btn btn-primary">Draw</button>
+                        </Link>
+                </div>
             </div>
           );
         })}

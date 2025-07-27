@@ -12,7 +12,7 @@ const Chat = () => {
   const [newMessage, setNewMessage] = useState("");
   const [targetUser, setTargetUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [showProfile, setShowProfile] = useState(false);
+  // const [showProfile, setShowProfile] = useState(false);
   const socketRef = useRef(null);
   const { darkMode } = useOutletContext();
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);

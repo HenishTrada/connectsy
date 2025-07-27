@@ -1,46 +1,55 @@
-const express=require("express");
+const express = require("express");
 const { userAuth } = require("../middlewares/auth");
-const paymentRouter=express.Router();
-const razorpayInstance=require("../utils/razorpay");
-const Payment=require("../models/payment")
-const {membershipAmount}=require("../utils/constants")
-const User =require("../models/user")
+const paymentRouter = express.Router();
+const razorpayInstance = require("../utils/razorpay");
+const Payment = require("../models/payment");
+const { membershipAmount } = require("../utils/constants");
+const User = require("../models/user");
 const crypto = require("crypto");
-paymentRouter.post("/payment/create",userAuth,async (req,res)=>{
-    
-    try{
-        
-        const {membershipType}=req.body
-        const {firstName,lastName,emailId}=req.user;
-        const order=await razorpayInstance.orders.create({
-            amount:membershipAmount[membershipType]*100,
-            currency:"INR",
-            receipt:"receipt#1",
-            notes:{
-                firstName,
-                lastName,
-                emailId,
-                membership:membershipType
-            }
-        })
-        const payment=new Payment({
-            userId:req.user._id,
-            orderId:order.id,
-            status:order.status,
-            amount:order.amount,
-            currency:order.currency,
-            receipt:order.receipt,
-            notes:order.notes
-        })
-        
-        const savedPayment=await payment.save();
-        res.json({...savedPayment.toJSON(),keyId:process.env.RAZORPAY_KEY_ID})
+paymentRouter.post("/payment/create", userAuth, async (req, res) => {
+  try {
+    const { membershipType } = req.body;
+    const { firstName, lastName, emailId } = req.user;
 
-    }catch(err){
-        console.error("Payment error:", err);
-        res.status(400).json("Erroor: "+err.message);
-    }
-})
+    // Log for debug
+    console.log("Received type:", membershipType);
+    console.log("Membership prices:", membershipAmount);
+
+    const order = await razorpayInstance.orders.create({
+      amount: membershipAmount[membershipType] * 100,
+      currency: "INR",
+      receipt: "receipt#1",
+      notes: {
+        firstName,
+        lastName,
+        emailId,
+        membership: membershipType,
+      },
+    });
+    const payment = new Payment({
+      userId: req.user._id,
+      orderId: order.id,
+      status: order.status,
+      amount: order.amount,
+      currency: order.currency,
+      receipt: order.receipt,
+      notes: order.notes,
+    });
+
+    console.log(payment);
+
+    const savedPayment = await payment.save();
+    console.log(savedPayment);
+    res.json({ ...savedPayment.toJSON(), keyId: process.env.RAZORPAY_KEY_ID });
+  } catch (err) {
+    console.error("Payment error:", err);
+    res.status(400).json({
+      success: false,
+      error: err.message,
+      details: err, // <-- more detailed info
+    });
+  }
+});
 
 paymentRouter.post("/payment/verify", userAuth, async (req, res) => {
   try {
@@ -52,7 +61,9 @@ paymentRouter.post("/payment/verify", userAuth, async (req, res) => {
       .digest("hex");
 
     if (generatedSignature !== signature) {
-      return res.status(400).json({ success: false, message: "Invalid signature" });
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid signature" });
     }
 
     const updatedPayment = await Payment.findOneAndUpdate(
@@ -65,7 +76,9 @@ paymentRouter.post("/payment/verify", userAuth, async (req, res) => {
     );
     await User.findByIdAndUpdate(req.user._id, { isVerified: true });
     if (!updatedPayment) {
-      return res.status(404).json({ success: false, message: "Payment record not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Payment record not found" });
     }
 
     res.json({ success: true, payment: updatedPayment });
@@ -74,4 +87,4 @@ paymentRouter.post("/payment/verify", userAuth, async (req, res) => {
   }
 });
 
-module.exports=paymentRouter;
+module.exports = paymentRouter;
