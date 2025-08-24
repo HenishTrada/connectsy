@@ -11,7 +11,7 @@ const http=require("http")
 
 app.use(
   cors({
-      origin: "https://connectsy.vercel.app", // your frontend URL
+      origin: "http://localhost:5173", // your frontend URL
     credentials: true,               // allow cookies
   })
 );
@@ -39,6 +39,11 @@ app.use("/",paymentRouter);
 app.use("/",chatRouter);
 app.use("/",photoRouter);
 app.use("/uploads", express.static("uploads"));
+
+// Health check endpoint for Docker
+app.get("/health", (req, res) => {
+  res.status(200).json({ status: "OK", timestamp: new Date().toISOString() });
+});
 
 
 const server=http.createServer(app);
