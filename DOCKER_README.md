@@ -75,4 +75,3 @@ docker-compose up --build
 
 ---
 
-**Simple and clean for interviews! 🚀**
